@@ -498,6 +498,7 @@ test("a new session puts the caret in the fresh composer on desktop only (#1313)
     newSessionBarFocusRef: { current: null },
     newSessionChoicesRef: { current: null },
     requestAnimationFrame: (cb) => frames.push(cb),
+    document: { activeElement: null },
     isMobile: false,
     activeCwd: "/p1",
     activeFileTabId: null,
@@ -524,6 +525,13 @@ test("a new session puts the caret in the fresh composer on desktop only (#1313)
   assert.equal(frames.length, 1);
   frames.splice(0).forEach((cb) => cb());
   assert.deepEqual(focused, ["composer"]);
+
+  // A dialog still open over the page (Settings) keeps the focus.
+  context.document.activeElement = { closest: (selector) => selector === "[aria-modal='true']" ? {} : null };
+  context.navigate.handleNewSession("kb-dialog", "/p1");
+  frames.splice(0).forEach((cb) => cb());
+  assert.deepEqual(focused, ["composer"]);
+  context.document.activeElement = null;
 
   // The bar's move keeps its control, so no caret request is made for it.
   context.newSessionBarFocusRef.current = "worktree";

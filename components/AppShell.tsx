@@ -939,8 +939,12 @@ export function AppShell() {
     // The fresh composer takes the caret once it renders (#1313), unless the
     // move came from the new-session bar, whose control keeps focus instead
     // (newSessionBarFocusRef), or a phone would raise the keyboard for it.
+    // A dialog still open over the page (Ctrl+Alt+N under Settings) keeps it.
     if (!isMobile && !newSessionBarFocusRef.current) {
-      requestAnimationFrame(() => chatInputRef.current?.focus());
+      requestAnimationFrame(() => {
+        if (document.activeElement?.closest("[aria-modal='true']")) return;
+        chatInputRef.current?.focus();
+      });
     }
   }, [activeCwd, changeFileWorkspace, invalidateWorkspaceRestore, isMobile, newSessionCwd, router, selectedSession]);
 
